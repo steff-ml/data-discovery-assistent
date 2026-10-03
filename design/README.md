@@ -7,6 +7,7 @@ Design of the Data Discovery Assistant, derived from [intent.yml](../intent/inte
 | View | Shows | Notation | Changes |
 |---|---|---|---|
 | [Flow](flow.md) | Per phase: who does what, and in which order | Responsibility matrix (Markdown table) + UML sequence diagram (Mermaid) | Every iteration |
+| [Interfaces](interfaces.md) | Every artifact passed between the lead and the agent | Interface register (Markdown table), then one section per interface | Every iteration |
 
 Everything is plain text in git: the AI reads and edits the source, you read the rendered view. Diagrams render on GitHub and in VS Code's Markdown preview (with a Mermaid extension such as *Markdown Preview Mermaid Support*).
 

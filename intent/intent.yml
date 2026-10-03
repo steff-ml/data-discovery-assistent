@@ -5,7 +5,7 @@
 
 meta:
   name: Data Discovery Assistant
-  version: 0.7
+  version: 0.8
   owner: steff-ml
   status: draft
   last_updated: 2026-10-03
@@ -65,7 +65,7 @@ system:
     - User's access permissions and credentials for non-open sources
   outputs:
     - Dataset inventory: candidate sources from structured databases to unstructured sources, each with provenance
-    - Feasibility dossier: per-dataset assessment against the feasibility rubric, with a go / no-go / needs-review recommendation and rationale
+    - Feasibility dossier: per-dataset assessment against the feasibility rubric, with a go / no-go recommendation, a confidence flag and enough evidence to judge it from the report alone
     - Combination assessment: how candidate datasets can be linked (shared identifiers, ontology mappings, gaps)
     - Value hypotheses: data product ideas that remain possible given the feasibility findings, each with its target audience
     - Pretotypes: lightweight artifacts that test demand, each with a target audience, a falsifiable hypothesis, a demand metric and a kill threshold
@@ -122,8 +122,9 @@ constraints:  # hard rules; violations are defects
       dataset with the same structure instead, so demand for the underlying product
       can still be tested. Resolving privacy questions is deferred to the build stage;
       flagged concerns are carried forward in the decision log.
-      The same applies to data a value idea needs but that is missing or not accessible:
-      a synthetic dataset stands in for it. Synthetic data is always labelled as
+      The same applies to data a value idea needs but that does not exist: a synthetic
+      dataset stands in for it. Data that exists but cannot be obtained (e.g. paywalled)
+      is flagged; a pretotype that depends on it is normally not shared. Synthetic data is always labelled as
       synthetic and never presented as a real source (C5).
   - id: C4
     rule: Respect licence terms of each source, including redistribution restrictions in pretotypes.
@@ -153,7 +154,7 @@ risks:  # includes assumptions that would hurt if false
   - risk: Hallucinated or mis-described datasets
     mitigation: C5; PR2; human review (PR1).
   - risk: Licence or access conditions misinterpreted
-    mitigation: Flag as indicative (non-goal on legal advice); mark uncertain cases as needs-review.
+    mitigation: Flag as indicative (non-goal on legal advice); give a low confidence flag where the evidence is thin.
   - risk: Re-identification through combination of aggregate data in small populations
     mitigation: C2, C3 (fall back to synthetic data); privacy_risk dimension in rubric.
   - risk: Overfitting to DMD or to biomedical data sources
@@ -208,8 +209,8 @@ glossary:
   go_no_go: >
     Per-dataset recommendation by the system (not the product-level decision,
     which is demand-driven and made by the data product lead). go = usable for the intended data product;
-    no-go = unusable (access, licence, quality or relevance);
-    needs-review = system cannot determine with sufficient confidence.
+    no-go = unusable (access, licence, quality or relevance).
+    Each recommendation carries a confidence flag; the lead decides.
   pretotype: >
     A minimal, low-cost artifact (e.g. mock dashboard on sample or synthetic data,
     fake-door landing page, Wizard-of-Oz service) built to test whether there is

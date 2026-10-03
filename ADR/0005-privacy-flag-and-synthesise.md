@@ -14,7 +14,8 @@ Data about people, especially in small populations such as rare diseases, can id
 - It never ingests, stores or outputs individual-level data (C2).
 - It never touches data that could introduce a privacy problem. Any step that finds a privacy concern flags it, and the pretotype uses a synthetic dataset with the same structure instead (C3).
 - Resolving privacy questions is deliberately deferred to the build stage. Flagged concerns are carried forward in the decision log.
-- Data that a value idea needs but that is missing or not accessible is also replaced by a synthetic dataset, so demand can be tested before the data problem is solved. (Added 2026-10-03.)
+- Data that a value idea needs but that does not exist is also replaced by a synthetic dataset, so demand can be tested before the data problem is solved. (Added 2026-10-03.)
+- Data that exists but cannot be obtained (e.g. paywalled) is not replaced silently: the gap is flagged, and a pretotype that depends on it is normally not shared. (Added 2026-10-03.)
 - Synthetic data is always labelled as synthetic and never presented as a real source.
 
 ## Alternatives considered

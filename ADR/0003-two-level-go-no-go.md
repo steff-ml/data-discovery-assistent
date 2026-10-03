@@ -10,7 +10,7 @@ The system produces go/no-go recommendations, but the decision that matters is w
 
 ## Decision
 
-- **Dataset level:** the system gives a go / no-go / needs-review recommendation per dataset, which is reviewed by a human.
+- **Dataset level:** the system gives a go / no-go recommendation per dataset with a confidence flag, which is reviewed by a human. There is no "unsure" category: the report must contain enough evidence (access, licence and the other rubric criteria) for the human to judge every dataset. (Revised 2026-10-03.)
 - **Product level:** the data product lead decides, driven by demand. If a pretotype's demand signal stays below its kill threshold, the product is a no-go.
 
 ## Alternatives considered
