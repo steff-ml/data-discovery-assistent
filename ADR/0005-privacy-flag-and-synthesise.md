@@ -14,6 +14,8 @@ Data about people, especially in small populations such as rare diseases, can id
 - It never ingests, stores or outputs individual-level data (C2).
 - It never touches data that could introduce a privacy problem. Any step that finds a privacy concern flags it, and the pretotype uses a synthetic dataset with the same structure instead (C3).
 - Resolving privacy questions is deliberately deferred to the build stage. Flagged concerns are carried forward in the decision log.
+- Data that a value idea needs but that is missing or not accessible is also replaced by a synthetic dataset, so demand can be tested before the data problem is solved. (Added 2026-10-03.)
+- Synthetic data is always labelled as synthetic and never presented as a real source.
 
 ## Alternatives considered
 
@@ -24,4 +26,4 @@ Data about people, especially in small populations such as rare diseases, can id
 
 - Demand can be tested even for products whose real data is sensitive.
 - Pretotypes may look less realistic when they run on synthetic data.
-- Every product that passes the demand test may carry open privacy issues into the build stage; the decision log must make these visible.
+- Every product that passes the demand test may carry open privacy issues or data gaps into the build stage; the decision log must make these visible.

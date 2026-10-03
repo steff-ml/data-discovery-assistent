@@ -5,7 +5,7 @@
 
 meta:
   name: Data Discovery Assistant
-  version: 0.6
+  version: 0.7
   owner: steff-ml
   status: draft
   last_updated: 2026-10-03
@@ -122,6 +122,9 @@ constraints:  # hard rules; violations are defects
       dataset with the same structure instead, so demand for the underlying product
       can still be tested. Resolving privacy questions is deferred to the build stage;
       flagged concerns are carried forward in the decision log.
+      The same applies to data a value idea needs but that is missing or not accessible:
+      a synthetic dataset stands in for it. Synthetic data is always labelled as
+      synthetic and never presented as a real source (C5).
   - id: C4
     rule: Respect licence terms of each source, including redistribution restrictions in pretotypes.
   - id: C5

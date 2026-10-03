@@ -12,3 +12,4 @@ Decisions made while writing [intent.yml](../intent/intent.yml). Format: context
 | [6](0006-domain-agnostic-core.md) | Domain-agnostic core, beyond rare disease and biomedical data | accepted |
 | [7](0007-single-user-learning-over-polish.md) | v1 is single-user and favours learning over polish | accepted |
 | [8](0008-fair-based-feasibility-rubric.md) | Feasibility rubric based on FAIR, extended with quality, freshness and privacy | accepted |
+| [9](0009-mermaid-shared-visual-language.md) | Mermaid as the shared visual language for human–AI system design | accepted |

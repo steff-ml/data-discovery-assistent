@@ -42,3 +42,19 @@ Fields that come from a specific framework, so they are recognisable when readin
 | `metric / target` (and `measurement` where not obvious) on success criteria | GQM, Volere fit criteria |
 | `kill_threshold` | Pretotyping, Test Card |
 | `id:` prefixes (P, G, C, PR, S) | Convention for traceability between sections; no specific source |
+
+## System design methodology
+
+Frameworks used in [design/](../design/README.md) to go from intent to a designed system.
+
+| Framework | What it contributes | Where | Source |
+|---|---|---|---|
+| **Twin Peaks** | Requirements and architecture are developed together, iteratively, rather than one after the other | The iteration loop in design/README.md | Nuseibeh, [Weaving together requirements and architectures](https://doi.org/10.1109/2.910904) (IEEE Computer, 2001) |
+| **C4 model** | Structural views at zoom levels; level 1 = System Context | Tried as a context view and removed: for a single-user prototype it repeated the flow view. Revisit if users or integrations grow. | [c4model.com](https://c4model.com/diagrams/system-context) |
+| **Event Storming** | Discovering a flow step by step with a small fixed vocabulary, including *hotspots* for open questions | Hotspots (`H#`) in [design/flow.md](../design/flow.md) | Alberto Brandolini, [eventstorming.com](https://www.eventstorming.com/) |
+| **Responsibility assignment matrix (RACI)** | Tasks as rows, roles as columns: who does what | Responsibility matrix in [design/flow.md](../design/flow.md) | [Wikipedia: Responsibility assignment matrix](https://en.wikipedia.org/wiki/Responsibility_assignment_matrix) |
+| **UML sequence diagram** | Actors as lanes, interactions over time, standard `loop` and `alt` frames | Sequence diagram per phase in design/flow.md | [OMG UML specification](https://www.omg.org/spec/UML/); [Mermaid sequence syntax](https://mermaid.js.org/syntax/sequenceDiagram.html) |
+| **Swimlanes** (BPMN lanes, UML activity partitions) | Separate responsibilities visually per actor | The idea behind both the matrix and the sequence diagram | [Wikipedia: Swim lane](https://en.wikipedia.org/wiki/Swim_lane); [bpmn.org](https://www.bpmn.org/) |
+| **Diagrams as code (Mermaid)** | Diagrams stored as text in git, so changes are versioned and reviewable | All views in design/ | [mermaid.js.org](https://mermaid.js.org/) |
+
+**Our own conventions (no external source):** two actors for the prototype (You, AI agent); using a sequence diagram as the swimlane view, because Mermaid has no native swimlane diagram (see [ADR 9](../ADR/0009-mermaid-shared-visual-language.md)); tagging stages with intent IDs (G, C, PR, S, ADR) for traceability; checkpoint IDs CP# and hotspot IDs H#; a changelog per view.
