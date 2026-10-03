@@ -1,0 +1,214 @@
+# Intent: Data Discovery Assistant
+# Entry point for system design. Values marked "proposed" are first guesses
+# to be confirmed or replaced after the first DMD run.
+# Rationale and sources for this structure: design_philosophy.md
+
+meta:
+  name: Data Discovery Assistant
+  version: 0.6
+  owner: steff-ml
+  status: draft
+  last_updated: 2026-10-03
+  related_docs:
+    - business_case.md          # value of the DMD data product (an OUTPUT of this system)
+    - scientific_background.md  # domain knowledge + hand-curated DMD source list (validation reference)
+    - design_philosophy.md      # why intent.yml is structured this way
+
+
+problem:
+  statement: >
+    Scientific research produces a lot of high-quality data, but finding out whether
+    a data product is feasible requires an expert to establish what data exists,
+    where it lives, how it is structured, whether it can be combined across ontologies,
+    and under which licence it may be used. This expert effort is spent before there
+    is any evidence of demand for the resulting data product, so high-value
+    opportunities are either neglected or pursued at high cost without validation.
+  core_insight: >
+    The bottleneck is not only that data is hard to find, but that the cost of
+    reaching a go/no-go decision is paid up front, before demand is proven.
+    The system should make that decision cheap, fast and reviewable.
+  sub_problems:  # ranked by expected impact on time-to-decision (proposed; validate on DMD)
+    - {id: P1, fair: Interoperable, problem: "Sources use different identifiers, ontologies and granularity; linking them needs domain expertise."}
+    - {id: P2, fair: Reusable, problem: "Licence and access conditions are scattered and hard to interpret."}
+    - {id: P3, fair: Findable, problem: "Relevant sources are spread over registries, databases, publications and supplementary files."}
+    - {id: P4, fair: Accessible, problem: "Data may be behind APIs, bulk downloads, subscriptions or data access committees."}
+    - {id: P5, fair: Reusable, problem: "Structure, coverage, freshness and quality are rarely documented."}
+
+
+stakeholders:
+  users:
+    - role: Data product lead (primary user; the owner)
+      job_to_be_done: Given a research question, quickly determine which data is available and usable, and whether a data product is worth pursuing.
+    - role: Domain expert (reviewer)
+      job_to_be_done: Review and correct the system's findings and recommendations with minimal effort.
+      note: Same person as the data product lead. v1 is built for a single user.
+  decision_makers:
+    - role: Data product lead (now); research organisation / funder / product owner (later)
+      decision: >
+        Product-level go/no-go - whether to build a data product. Driven by demand:
+        if the pretotype's demand signal stays below its kill threshold, it is a no-go.
+        Made by the data product lead, not by the system.
+  data_product_audience: >
+    Not an input. Identified by the system after feasibility testing (G3), because
+    what is feasible limits which value ideas remain (e.g. population-level data
+    only rules out patient-level use cases and their audiences).
+
+
+system:
+  description: >
+    An assistant that turns a research question into a cited feasibility dossier
+    and a set of demand-testing pretotypes, so that a go/no-go decision on a data
+    product can be made before significant expert effort is committed.
+  inputs:
+    - Research question or problem statement (e.g. "Which DMD patients are eligible for which therapies and trials?")
+    - Optional seed context: known sources, target users of the data product, domain ontologies
+    - User's access permissions and credentials for non-open sources
+  outputs:
+    - Dataset inventory: candidate sources from structured databases to unstructured sources, each with provenance
+    - Feasibility dossier: per-dataset assessment against the feasibility rubric, with a go / no-go / needs-review recommendation and rationale
+    - Combination assessment: how candidate datasets can be linked (shared identifiers, ontology mappings, gaps)
+    - Value hypotheses: data product ideas that remain possible given the feasibility findings, each with its target audience
+    - Pretotypes: lightweight artifacts that test demand, each with a target audience, a falsifiable hypothesis, a demand metric and a kill threshold
+    - Decision log: every claim and recommendation traceable to its source and reviewable by a human
+  feasibility_rubric:  # based on FAIR, extended
+    - findable: Is the source discoverable and persistently identified?
+    - accessible: How can it be obtained (open download, API, registration, subscription, data access committee)?
+    - interoperable: Which identifiers / ontologies does it use; can it be joined to the other candidates?
+    - reusable: Licence, terms of use, redistribution and commercial-use restrictions.
+    - quality: Coverage, granularity, completeness, known biases.
+    - freshness: Update frequency and date of last update.
+    - privacy_risk: Does use or combination risk re-identification of individuals?
+
+
+value:
+  system_value:
+    - Reduces time and expert effort needed to reach a go/no-go decision on a data product.
+    - Makes feasibility judgements transparent and reviewable instead of residing in one expert's head.
+    - Prevents investment in data products for which no demand exists, and surfaces neglected high-value ones.
+  output_value_example: >
+    DMD: linking patient mutation profiles to therapy and trial eligibility.
+    See business_case.md.
+
+
+goals:
+  - id: G1
+    goal: Discover datasets relevant to a research question, across structured and unstructured sources.
+  - id: G2
+    goal: Assess the feasibility of each dataset and of combining them, and give a reasoned go/no-go recommendation.
+  - id: G3
+    goal: >
+      From the feasibility findings, derive which data product ideas remain possible,
+      identify the audience for each, and generate pretotypes that test that audience's
+      demand, each tied to an explicit hypothesis.
+
+
+non_goals:
+  - Full prototyping or building of data products. The system stops at pretotypes; production pipelines are a separate effort.
+  - Data management (cataloguing, storage, governance of an organisation's data estate). The system is not a data catalog.
+  - Autonomous decision-making. The system recommends; humans decide.
+  - Legal advice. Licence assessments are indicative and flagged for human review.
+
+
+constraints:  # hard rules; violations are defects
+  - id: C1
+    rule: Only access data that is open or for which the user has explicit permission. Never attempt to circumvent access controls, paywalls or data access committees.
+  - id: C2
+    rule: Do not ingest, store or output individual-level data. Pretotypes use public, aggregated or synthetic data only.
+  - id: C3
+    rule: >
+      Never touch data that could introduce a privacy problem. Any step that finds
+      a privacy concern (e.g. small counts of people, such as "3 patients with an
+      exon 45 deletion in Belgium") flags it, and the pretotype uses a synthetic
+      dataset with the same structure instead, so demand for the underlying product
+      can still be tested. Resolving privacy questions is deferred to the build stage;
+      flagged concerns are carried forward in the decision log.
+  - id: C4
+    rule: Respect licence terms of each source, including redistribution restrictions in pretotypes.
+  - id: C5
+    rule: Never list a dataset that does not resolve to an existing resource.
+
+
+principles:  # design guidance; trade-offs allowed but must be justified
+  - id: PR1
+    principle: Human in the loop. Every go/no-go recommendation is reviewed by a human before it drives a decision.
+  - id: PR2
+    principle: Traceability. Every claim about a dataset links to the source it was derived from, with the date it was checked.
+  - id: PR3
+    principle: Honest uncertainty. When the system cannot verify something (licence, schema, quality), it says so rather than guessing.
+  - id: PR4
+    principle: Cheap before expensive. Prefer the lowest-cost check that can falsify a hypothesis before investing in deeper analysis.
+  - id: PR5
+    principle: Domain-agnostic core. The system must work beyond rare disease and biomedical data. Domain knowledge (e.g. DMD) is supplied as configuration or context, not hard-coded.
+  - id: PR6
+    principle: >
+      Learning over polish. v1 serves a single user and exists to learn what works.
+      It may use capable, heavier models and tools; a rework to simpler models and
+      tools is planned, with demand deciding when and how.
+
+
+risks:  # includes assumptions that would hurt if false
+  - risk: Hallucinated or mis-described datasets
+    mitigation: C5; PR2; human review (PR1).
+  - risk: Licence or access conditions misinterpreted
+    mitigation: Flag as indicative (non-goal on legal advice); mark uncertain cases as needs-review.
+  - risk: Re-identification through combination of aggregate data in small populations
+    mitigation: C2, C3 (fall back to synthetic data); privacy_risk dimension in rubric.
+  - risk: Overfitting to DMD or to biomedical data sources
+    mitigation: PR5; validate on a second, non-rare-disease domain later (S7).
+  - risk: Pretotypes measure interest rather than real demand
+    mitigation: Define demand metrics that require commitment (time, money, data, introductions), not just views.
+  - risk: Sources go stale after assessment
+    mitigation: Record check dates (PR2); support re-assessment.
+  - risk: "Assumption: open and permission-accessible data is not enough to show value for DMD"
+    mitigation: Detected early by G2; a no-go here is a valid outcome.
+  - risk: Self-review bias. The data product lead is also the only expert reviewer, so system output can anchor their judgement.
+    mitigation: Make expert go/no-go calls before seeing the system's (S3); bring in an external reviewer when available.
+  - risk: "Assumption: the DMD source list in scientific_background.md is incomplete as a reference set"
+    mitigation: Expert precision review (S2) also captures relevant sources missing from the list.
+
+
+success_criteria:  # targets are proposed; calibrate after first DMD run
+  - id: S1
+    criterion: Discovery recall
+    metric: Share of the hand-curated DMD reference sources (scientific_background.md, Data resources) found for the question "Which DMD patients, by mutation profile, are eligible for which approved therapies and open clinical trials?"
+    target: ">= 80%"
+  - id: S2
+    criterion: Discovery precision and breadth
+    metric: Share of discovered sources judged relevant by a domain expert; number of source categories covered
+    target: ">= 70% relevant; all four categories in the DMD reference list represented"
+  - id: S3
+    criterion: Recommendation quality
+    metric: Agreement between system go/no-go and expert go/no-go per dataset
+    target: ">= 80% agreement; restricted sources (e.g. HGMD, TREAT-NMD registry) correctly flagged as restricted"
+    measurement: Expert records own go/no-go per dataset before looking at the system's recommendations.
+  - id: S4
+    criterion: Time to decision
+    metric: Elapsed time from research question to reviewed feasibility dossier
+    target: "< 1 working day. Baseline: not done at all, because manual effort is too high to undertake"
+    measurement: Timed run including human review.
+  - id: S5
+    criterion: Traceability
+    metric: Share of claims with a resolvable source reference
+    target: 100%
+  - id: S6
+    criterion: Pretotype usefulness
+    metric: Share of pretotypes with a named target audience, a falsifiable hypothesis, a demand metric and a kill threshold, all consistent with the feasibility findings
+    target: 100%, and at least one pretotype actually exposed to target users with a recorded demand signal
+  - id: S7
+    criterion: Generality
+    metric: S1–S5 results on a second domain outside rare disease (chosen later, with its own research question and hand-curated source list), run without code changes
+    target: Within 10 percentage points of DMD
+    status: deferred until after the first DMD run
+
+
+glossary:
+  go_no_go: >
+    Per-dataset recommendation by the system (not the product-level decision,
+    which is demand-driven and made by the data product lead). go = usable for the intended data product;
+    no-go = unusable (access, licence, quality or relevance);
+    needs-review = system cannot determine with sufficient confidence.
+  pretotype: >
+    A minimal, low-cost artifact (e.g. mock dashboard on sample or synthetic data,
+    fake-door landing page, Wizard-of-Oz service) built to test whether there is
+    demand for a data product before building it. Not a working prototype.
+  kill_threshold: Pre-defined demand level below which the data product idea is dropped.
